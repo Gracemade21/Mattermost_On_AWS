@@ -79,3 +79,51 @@ The deployment consists of:
 - SSH into the MySQL instance:
   ```bash
   ssh -i MySQL.pem ubuntu@<private-IP>
+
+- Update the system:
+  ```bash
+  sudo apt update && sudo apt upgrade -y
+
+- Create the MySQL installation script on EC2:
+```bash
+vim setup-mysql.sh
+
+- Paste the MySQL installation script on EC2:
+  ```bash
+  #!/bin/bash
+apt update -y
+apt install mysql-server -y
+
+echo "Installed MySQL"
+systemctl start mysql
+sleep 5
+
+echo "Configuring MySQL now"
+mysql -u root <<-EOF
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
+DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+DELETE FROM mysql.user WHERE User='';
+DELETE FROM mysql.db WHERE Db='test' OR Db='test_%';
+FLUSH PRIVILEGES;
+CREATE USER 'mmuser'@'%' IDENTIFIED BY 'mostest';
+CREATE DATABASE mattermost_test;
+GRANT ALL PRIVILEGES ON mattermost_test.* TO 'mmuser'@'%'; 
+EOF
+
+echo "MySQL Configuration complete"
+sed -i "s/^bind-address/#bind-address/" /etc/mysql/mysql.conf.d/mysqld.cnf
+
+systemctl restart mysql
+
+- Make the script executable:
+  ```bash
+  chmod +x setup-mysql.sh
+
+- Run the script with sudo:
+  ```bash
+  sudo ./setup-mysql.sh
+
+- Verify MySQL is running:
+  ```bash
+  sudo systemctl status mysql
+
