@@ -218,7 +218,7 @@ The deployment consists of:
 ### 8. Access Mattermost Web Application
 - Open a web browser and navigate to:
 
-  `` `cpp
+  ```cpp
   http://<Mattermost-public-IP>:8065
 
 - Complete the initial setup through the web interface.
