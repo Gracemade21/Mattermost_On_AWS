@@ -91,29 +91,51 @@ The deployment consists of:
 - Paste the MySQL installation script on EC2:
   ```bash
   #!/bin/bash
+
+  # Exit immediately if a command exits with a non-zero status
+  set -e
+  
+  # Update package list and install MySQL Server
   apt update -y
-  apt install mysql-server -y
-
-  echo "Installed MySQL"
+  apt install -y mysql-server
+  
+  echo "[INFO] MySQL installed."
+  
+  # Start MySQL service and enable it on boot
   systemctl start mysql
+  systemctl enable mysql
   sleep 5
-
-  echo "Configuring MySQL now"
+  
+  echo "[INFO] Configuring MySQL..."
+  
+  # Secure MySQL and configure user/database
   mysql -u root <<-EOF
-  ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
-  DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
-  DELETE FROM mysql.user WHERE User='';
+  -- Set root password and use native authentication
+  ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'StrongPasswordHere';
+  
+  -- Remove unnecessary users and test databases
+  DELETE FROM mysql.user WHERE User='' OR (User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1'));
+  DROP DATABASE IF EXISTS test;
   DELETE FROM mysql.db WHERE Db='test' OR Db='test_%';
   FLUSH PRIVILEGES;
+  
+  -- Create application user and database
   CREATE USER 'mmuser'@'%' IDENTIFIED BY 'mostest';
-  CREATE DATABASE mattermost_test;
-  GRANT ALL PRIVILEGES ON mattermost_test.* TO 'mmuser'@'%'; 
+  CREATE DATABASE mattermost_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+  GRANT ALL PRIVILEGES ON mattermost_test.* TO 'mmuser'@'%';
+  FLUSH PRIVILEGES;
   EOF
-
-  echo "MySQL Configuration complete"
-  sed -i "s/^bind-address/#bind-address/" /etc/mysql/mysql.conf.d/mysqld.cnf
-
+  
+  echo "[INFO] MySQL user and database created."
+  
+  # Update bind-address to allow remote access
+  sed -i "s/^bind-address\s*=.*/#bind-address = 127.0.0.1/" /etc/mysql/mysql.conf.d/mysqld.cnf
+  
+  # Restart MySQL to apply changes
   systemctl restart mysql
+  
+  echo "[INFO] MySQL configuration complete and service restarted."
+
 
 - Make the script executable:
   ```bash
