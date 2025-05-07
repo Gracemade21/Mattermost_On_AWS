@@ -111,7 +111,7 @@ The deployment consists of:
   # Secure MySQL and configure user/database
   mysql -u root <<-EOF
   -- Set root password and use native authentication
-  ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'StrongPasswordHere';
+  ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
   
   -- Remove unnecessary users and test databases
   DELETE FROM mysql.user WHERE User='' OR (User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1'));
