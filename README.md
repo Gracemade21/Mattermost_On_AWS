@@ -127,3 +127,104 @@ The deployment consists of:
   ```bash
   sudo systemctl status mysql
 
+
+### 7. Install and Configure Mattermost
+
+- SSH into the Mattermost instance:
+  ```bash
+  ssh -i Mattermost.pem ubuntu@<public-IP>
+
+- Update the system:
+  ```bash
+  sudo apt update && sudo apt upgrade -y
+
+- Create the MySQL installation script on EC2:
+  ```bash
+  vim setup-mysql.sh
+
+- Paste the Mattermost installation script on EC2:
+  ```bash
+  #!/bin/bash
+
+  # Check if DB host argument is passed
+  if [ -z "$1" ]; then
+    echo "Usage: $0 <DB_HOST>"
+    exit 1
+  fi
+    
+  # Variables
+  MM_VERSION=5.19.0
+  MM_TAR="mattermost-${MM_VERSION}-linux-amd64.tar.gz"
+  MM_DIR="/opt/mattermost"
+  DB_HOST=$1
+  
+  # Download Mattermost
+  wget "https://releases.mattermost.com/${MM_VERSION}/${MM_TAR}" || { echo "Download failed"; exit 1; }
+  echo "Downloaded Mattermost"
+  
+  # Extract and install
+  tar -xvzf "$MM_TAR" || { echo "Extraction failed"; exit 1; }
+  echo "Extracted Mattermost"
+  mv mattermost "$MM_DIR"
+  mkdir -p "$MM_DIR/data"
+  
+  # Clean up tarball after extraction
+  rm -f "$MM_TAR"
+  echo "Cleaned up tarball"
+  
+  # Create system user
+  id mattermost &>/dev/null || useradd --system --user-group mattermost
+  echo "Created user"
+  
+  # Backup and update DB host in config.json
+  CONFIG="$MM_DIR/config/config.json"
+  cp "$CONFIG" "$CONFIG.bak"
+  
+  # Replace DB host (assuming default connection string format)
+  sed -i "s/localhost:3306/${DB_HOST}:3306/" "$CONFIG"
+  echo "Updated config.json with DB host: $DB_HOST"
+  
+  # Optional: set correct permissions for the entire directory
+  chown -R mattermost:mattermost "$MM_DIR"
+  chmod -R 775 "$MM_DIR/data" # Ensure that data directory is writable by mattermost user
+  echo "Set correct permissions"
+  
+  # (Optional) Start Mattermost after installation
+  # sudo -u mattermost ./bin/mattermost &
+  
+  echo "Mattermost setup completed."
+  
+- Make the script executable:
+  ```bash
+  chmod +x setup-mysql.sh
+
+- Run the script with sudo:
+  ```bash
+  sudo ./setup-mysql.sh
+
+- Verify MySQL is running:
+  ```bash
+  sudo systemctl status mysql
+
+
+
+
+
+- Download and run the Mattermost installation script:
+  ```bash
+Copy
+Edit
+wget https://raw.githubusercontent.com/OmarCloud20/aws-tutorials/main/install_mattermost.sh
+chmod 700 install_mattermost.sh
+sudo ./install_mattermost.sh
+Configure Mattermost to connect to the MySQL database using the private IP address.
+
+8. Access Mattermost Web Application
+Open a web browser and navigate to:
+
+cpp
+Copy
+Edit
+http://<Mattermost-public-IP>:8065
+Complete the initial setup through the web interface.
+
