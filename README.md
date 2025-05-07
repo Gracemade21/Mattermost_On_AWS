@@ -140,7 +140,7 @@ The deployment consists of:
 
 - Create the MySQL installation script on EC2:
   ```bash
-  vim setup-mysql.sh
+  vim install_mattermost.sh
 
 - Paste the Mattermost installation script on EC2:
   ```bash
@@ -196,35 +196,32 @@ The deployment consists of:
   
 - Make the script executable:
   ```bash
-  chmod +x setup-mysql.sh
+  chmod +x install_mattermost.sh
 
-- Run the script with sudo:
+- ### Run the script with your MySQL host
+  Replace your-db-host with the actual hostname or IP address of your MySQL server:
   ```bash
-  sudo ./setup-mysql.sh
+  ./install_mattermost.sh your-db-host
 
-- Verify MySQL is running:
+- Example:
   ```bash
-  sudo systemctl status mysql
+  ./install_mattermost.sh 192.168.1.100
+
+- ### What to Expect
+  - It will download and extract Mattermost.
+  - Move it to /opt/mattermost.
+  - Create a mattermost system user.
+  - Update config.json to point to the MySQL host you specified.
+  - Set correct permissions.
 
 
+### 8. Access Mattermost Web Application
+- Open a web browser and navigate to:
 
+  `` `cpp
+  http://<Mattermost-public-IP>:8065
 
+- Complete the initial setup through the web interface.
 
-- Download and run the Mattermost installation script:
-  ```bash
-Copy
-Edit
-wget https://raw.githubusercontent.com/OmarCloud20/aws-tutorials/main/install_mattermost.sh
-chmod 700 install_mattermost.sh
-sudo ./install_mattermost.sh
-Configure Mattermost to connect to the MySQL database using the private IP address.
-
-8. Access Mattermost Web Application
-Open a web browser and navigate to:
-
-cpp
-Copy
-Edit
-http://<Mattermost-public-IP>:8065
-Complete the initial setup through the web interface.
-
+### Conclusion
+By following this guide, you've successfully deployed a self-hosted Mattermost application with a MySQL backend on AWS EC2, utilizing a secure VPC architecture with public and private subnets.
