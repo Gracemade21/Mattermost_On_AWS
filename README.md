@@ -12,6 +12,44 @@ This guide walks you through setting up a secure, self-hosted Mattermost chat ap
 - Basic knowledge of AWS services (VPC, EC2, Subnets, sql database, Security Groups).
 - SSH access to EC2 instances.
 
+# 🛠️ Self-Hosted Team Communication Solution on AWS
+
+## 📖 Scenario
+
+Team communication and instant messaging solutions are essential in modern business environments. As of 2020, platforms like Slack and Microsoft Teams collectively served over **20 million users**.
+
+However, some organizations have **compliance policies** that restrict the use of third-party managed services. For these organizations, **self-hosted communication solutions** are preferred to maintain full control over data and infrastructure — including chat and collaboration tools.
+
+---
+
+## 🧱 Architecture Implementation
+
+This project demonstrates how to deploy a self-hosted **Mattermost** instance with a **MySQL** backend using AWS EC2 within a secure network architecture.
+
+### 🔐 Network Design
+
+- Create a **custom VPC** with:
+  - **Public Subnet** – for the Mattermost server.
+  - **Private Subnet** – for the MySQL database.
+  
+### 🧩 Components Setup
+
+1. **MySQL Installation**
+   - Launch an **Amazon Linux 2** EC2 instance in the **private subnet**.
+   - Install and configure **MySQL** following provided setup instructions.
+   - Access this instance using a **Bastion Host** and enable internet access through a **NAT Gateway**.
+
+2. **Mattermost Installation**
+   - Launch an **Amazon Linux 2** EC2 instance in the **public subnet**.
+   - Install and configure **Mattermost** using the provided instructions.
+
+3. **Security Groups**
+   - Configure security groups to:
+     - Allow inbound traffic to the **Mattermost instance on port 8065**.
+     - Restrict MySQL access to internal subnets only.
+
+---
+
 ## 🗺️ Architecture Overview
 ![image](https://github.com/user-attachments/assets/a4d139de-869c-4c2e-b66d-eab501617489)
 
