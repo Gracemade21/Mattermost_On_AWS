@@ -90,17 +90,18 @@ The deployment consists of:
 - **Public Route Table**:
   - Associate it with the public subnet.
   - Add a route: Destination `0.0.0.0/0`, Target: Internet Gateway.
+ 
+- **NAT Gateway**:
+  - Create NAT gateway.
+  - Chose Public subnet.
+  - connectivity type for the NAT gateway: Public.
+  - Assign an Elastic IP address to the NAT gateway.
 
 - **Private Route Table**:
   - Associate it with the private subnet.
-  - Add a route: Destination `0.0.0.0/0`, Target: NAT instance (to be created).
+  - Add a route: Destination `0.0.0.0/0`, Target: NAT Gateway.
 
 ### 5. Launch EC2 Instances
-
-- **NAT Instance**:
-  - Launch in the public subnet.
-  - Assign an Elastic IP.
-  - Configure as a NAT instance.
 
 - **MySQL Database Instance**:
   - Launch in the private subnet.
